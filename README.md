@@ -1,19 +1,23 @@
 # healthcare-data-integration
 
-ETL that consolidates patient data from a FHIR R4 server, a legacy Oracle
-EHR, lab CSV drops, and EDI 837/835 claim files into a single master
-patient index and downstream Delta/Postgres/Elasticsearch stores. Includes
-probabilistic record matching and Safe-Harbor PHI masking.
+A reference implementation of a healthcare data hub: consolidates
+patient data from a FHIR R4 server, a legacy Oracle EHR, lab CSV drops
+over SFTP, and EDI 837/835 claim files into a master patient index plus
+downstream Delta / Postgres / Elasticsearch stores. Includes
+probabilistic record matching, Safe-Harbor PHI masking, and an
+immutable HIPAA audit log.
 
-## Problem
+## Problem domain
 
-The same person tends to exist 4-5 times across hospital systems with
-slightly different names, DOBs or addresses. Joining anything analytical
-is impossible without a master patient index (MPI). This project builds
-that MPI, masks PHI for the analytics path, and keeps a HIPAA audit trail
-of every PHI access.
+Patient identifiers fragment across hospital systems — the same person
+exists multiple times under slightly different names, dates of birth, or
+addresses. Analytical and operational use cases require a single
+identity reconciled across sources, with PHI handled correctly under
+HIPAA. The patterns here cover that consolidation: fuzzy identity
+matching, code validation, masking for analytics paths, and
+claim/remittance reconciliation.
 
-## Sources & targets
+## Sources and targets
 
 ```
 sources                          targets
@@ -41,26 +45,25 @@ src/clinical_etl/
 
 ## Matching
 
-The default weights are 0.35 name / 0.30 identifier / 0.25 dob / 0.10
-address. Anything >= 0.85 is auto-merged; 0.65-0.85 lands in a steward
-queue for a human to resolve. The name comparison runs Jaro-Winkler from
-`rapidfuzz`, which gave us materially better recall on nickname pairs
-than Levenshtein alone.
+Default weights: 0.35 name / 0.30 identifier / 0.25 dob / 0.10 address.
+Scores >= 0.85 auto-merge; 0.65 to 0.85 enters a steward queue for human
+resolution. Name similarity uses Jaro-Winkler from `rapidfuzz`, chosen
+for better recall on nickname pairs than plain Levenshtein.
 
 ## PHI masking
 
-The `PHIMasker` covers the 18 identifiers from 45 CFR 164.514(b). The
-output is consistent (salted SHA-256 over normalised text), so the
-matcher can still join records by hash. The salt comes from `.env` and
-must not change between runs once data is in the warehouse — there's a
-TODO to add a key-rotation procedure.
+`PHIMasker` covers the 18 identifiers from 45 CFR 164.514(b). Outputs
+are consistent (salted SHA-256 over normalised text), which lets the
+matcher join records by hash. The salt is loaded from environment
+configuration and must remain stable once data is persisted to the
+warehouse — rotation requires a re-key procedure.
 
 ## EDI
 
-The included 837/835 parser is intentionally lightweight (split on `~`
-and `*`, look for `CLM` / `CLP` segments). Anything close to production
-should swap it for `pyx12` or `bots` — these are unforgiving formats and
-real partner files will hit edges this code doesn't cover.
+The included 837/835 parser is intentionally lightweight (segment-level
+parsing of `CLM` / `CLP` records). Production deployments against real
+partner files should substitute `pyx12` or `bots`, which handle the full
+X12 envelope and edge cases.
 
 ## Running locally
 
@@ -74,23 +77,33 @@ make celery-worker            # in a second terminal
 
 Sample data:
 
-- `data/sample/lab_patients.csv` — 10 rows the masker walks through
+- `data/sample/lab_patients.csv` — 10 rows used by the masker demo
 - `data/sample/fhir_patient.json` — one FHIR Patient resource
 - `data/sample/sample.837` — a stripped-down 837 envelope
 
 ## Stack
 
-Python 3.11, pandas, polars, fhir.resources, hl7apy, pyx12 (planned),
+Python 3.11, pandas, polars, fhir.resources, hl7apy, pyx12 (optional),
 oracledb, psycopg2, deltalake, elasticsearch, rapidfuzz, redis, celery,
 pydantic, structlog.
 
-## Caveats
+## Design notes
 
-- The audit log is local JSONL in dev. In production it has to land in
-  object storage with write-once (S3 object lock or ADLS immutability).
-- The ES index is fed from the masked view. If you ever need to search
-  by real name, you'll need to grant a separate role to the unmasked
-  side-store (and audit every query).
-- Celery beat is configured but not running by default — kick it off
-  with `celery -A clinical_etl.orchestration.tasks beat` once the
-  worker is up.
+- The audit log is local JSONL by default. Production deployments
+  should land it on object storage with write-once semantics
+  (S3 Object Lock or ADLS immutability policies).
+- The Elasticsearch index is fed from the masked projection. If
+  unmasked search is required (e.g. for treatment-purpose queries),
+  the unmasked side-store needs a separate role, and every query must
+  be captured by the audit logger.
+- Celery beat is configured in the task module but not started by
+  `make docker-up`. Start it manually with
+  `celery -A clinical_etl.orchestration.tasks beat` for scheduled
+  ingestion.
+
+## About this code
+
+Open-source companion to the healthcare data work done by
+[acilox](https://github.com/acilox). For paid implementation,
+deployment, or extension of these patterns — including hardening
+against real HIPAA-regulated environments — open an issue.
