@@ -1,0 +1,11 @@
+patient_id,first_name,last_name,dob,gender,email,phone,zip,state
+LAB-1001,Alice,Anderson,1985-06-15,female,alice@example.com,************,02101,MA
+LAB-1002,Bob,Brown,1978-11-22,male,bob@example.com,************,10001,NY
+LAB-1003,Carol,Chen,1992-03-08,female,carol@example.com,************,94105,CA
+LAB-1004,David,Davies,1965-09-14,male,david@example.com,************,60601,IL
+LAB-1005,Eve,Edwards,2000-01-30,female,eve@example.com,************,77001,TX
+LAB-1006,Frank,Foster,1955-07-04,male,frank@example.com,************,33101,FL
+LAB-1007,Grace,Garcia,1988-12-19,female,grace@example.com,************,98101,WA
+LAB-1008,Henry,Hill,1970-04-25,male,henry@example.com,************,80201,CO
+LAB-1009,Iris,Ivanov,1995-08-11,female,iris@example.com,************,30301,GA
+LAB-1010,James,Johnson,1982-02-17,male,james@example.com,************,02101,MA

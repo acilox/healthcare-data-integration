@@ -1,0 +1,35 @@
+{
+  "resourceType": "Patient",
+  "id": "fhir-pat-001",
+  "identifier": [
+    {
+      "type": {
+        "coding": [{"system": "http://terminology.hl7.org/CodeSystem/v2-0203", "code": "MR"}]
+      },
+      "value": "MRN-12345"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "given": ["Alice", "M"],
+      "family": "Anderson"
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1985-06-15",
+  "telecom": [
+    {"system": "email", "value": "alice@example.com"},
+    {"system": "phone", "value": "************"}
+  ],
+  "address": [
+    {
+      "use": "home",
+      "line": ["123 Main St", "Apt 4B"],
+      "city": "Boston",
+      "state": "MA",
+      "postalCode": "02101",
+      "country": "US"
+    }
+  ]
+}
