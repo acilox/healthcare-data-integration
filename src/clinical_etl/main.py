@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
 from pathlib import Path
 
 import typer
@@ -12,7 +11,7 @@ from rich.table import Table
 
 from clinical_etl.config import configure_logging, get_logger, get_settings
 from clinical_etl.extract import LabCSVExtractor
-from clinical_etl.transform import CodeValidator, PatientMatcher, PHIMasker
+from clinical_etl.transform import CodeValidator, PHIMasker
 from clinical_etl.utils import HIPAAAuditLogger
 
 app = typer.Typer(name="clinical_etl", help="Clinical ETL CLI", no_args_is_help=True)

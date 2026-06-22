@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 from datetime import date, datetime
-from enum import Enum
-from typing import Optional
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class PatientSource(str, Enum):
+class PatientSource(StrEnum):
     FHIR = "FHIR"
     ORACLE_EHR = "ORACLE_EHR"
     LAB_CSV = "LAB_CSV"
@@ -26,26 +25,26 @@ class PatientMatchCandidate(BaseModel):
     source_id: str = Field(..., min_length=1, max_length=128)
 
     # Identifiers
-    mrn: Optional[str] = Field(None, max_length=64)
-    ssn_last4: Optional[str] = Field(None, max_length=4)
-    insurance_id: Optional[str] = Field(None, max_length=64)
+    mrn: str | None = Field(None, max_length=64)
+    ssn_last4: str | None = Field(None, max_length=4)
+    insurance_id: str | None = Field(None, max_length=64)
 
     # Demographics
     first_name: str = Field(..., min_length=1, max_length=128)
-    middle_name: Optional[str] = Field(None, max_length=128)
+    middle_name: str | None = Field(None, max_length=128)
     last_name: str = Field(..., min_length=1, max_length=128)
     date_of_birth: date
-    gender: Optional[str] = Field(None, max_length=16)
+    gender: str | None = Field(None, max_length=16)
 
     # Contact
-    email: Optional[str] = Field(None, max_length=256)
-    phone: Optional[str] = Field(None, max_length=32)
+    email: str | None = Field(None, max_length=256)
+    phone: str | None = Field(None, max_length=32)
 
     # Address
-    address_line1: Optional[str] = Field(None, max_length=256)
-    city: Optional[str] = Field(None, max_length=128)
-    state: Optional[str] = Field(None, max_length=64)
-    postal_code: Optional[str] = Field(None, max_length=20)
+    address_line1: str | None = Field(None, max_length=256)
+    city: str | None = Field(None, max_length=128)
+    state: str | None = Field(None, max_length=64)
+    postal_code: str | None = Field(None, max_length=20)
     country: str = Field("US", max_length=2)
 
     # Source tracking
@@ -74,12 +73,12 @@ class MasterPatient(BaseModel):
     master_id: str = Field(..., min_length=1, max_length=64)
 
     # Masked demographics (after PHI masking)
-    first_name_hash: Optional[str] = None
-    last_name_hash: Optional[str] = None
-    dob_year: Optional[int] = Field(None, ge=1900, le=2100)
-    gender: Optional[str] = None
-    zip3: Optional[str] = Field(None, max_length=3)
-    state: Optional[str] = None
+    first_name_hash: str | None = None
+    last_name_hash: str | None = None
+    dob_year: int | None = Field(None, ge=1900, le=2100)
+    gender: str | None = None
+    zip3: str | None = Field(None, max_length=3)
+    state: str | None = None
     country: str = "US"
 
     # Source linkages (preserved for join-back)

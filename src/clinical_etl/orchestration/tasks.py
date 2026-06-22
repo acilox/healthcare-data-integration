@@ -52,12 +52,11 @@ app.conf.beat_schedule = {
 def extract_fhir_patients(self, modified_after: str | None = None):
     """Extract patients from FHIR, match against MPI, mask, load."""
     from clinical_etl.extract import FHIRPatientExtractor
-    from clinical_etl.transform import PatientMatcher, PHIMasker
+    from clinical_etl.transform import PHIMasker
     from clinical_etl.utils import HIPAAAuditLogger
 
     audit = HIPAAAuditLogger()
     masker = PHIMasker()
-    matcher = PatientMatcher()
 
     after = datetime.fromisoformat(modified_after) if modified_after else None
     count = 0
@@ -72,14 +71,14 @@ def extract_fhir_patients(self, modified_after: str | None = None):
                     purpose="OPERATIONS",
                     source="FHIR",
                 )
-                masked = masker.mask_patient_record(candidate.model_dump())
+                masker.mask_patient_record(candidate.model_dump())
                 count += 1
                 # In real impl: bulk-buffer and load to ADLS/Postgres/ES
         logger.info("celery_fhir_complete", count=count)
         return count
     except Exception as e:
         logger.exception("celery_fhir_failed", error=str(e))
-        raise self.retry(exc=e)
+        raise self.retry(exc=e) from e
 
 
 @app.task(bind=True, max_retries=3)
@@ -88,10 +87,8 @@ def process_edi_files(self):
     from pathlib import Path
 
     from clinical_etl.extract import EDIExtractor
-    from clinical_etl.transform import ClaimsAdjudicator
 
     ext = EDIExtractor()
-    adjudicator = ClaimsAdjudicator()
 
     inbox = Path(settings.edi_inbound_dir)
     processed = 0
@@ -100,7 +97,7 @@ def process_edi_files(self):
         return 0
 
     for file_path in inbox.glob("*.837"):
-        for claim in ext.parse_837(file_path):
+        for _claim in ext.parse_837(file_path):
             # In real impl: look up matching 835, then adjudicate
             processed += 1
 

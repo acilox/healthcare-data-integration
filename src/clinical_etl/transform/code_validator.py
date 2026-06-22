@@ -18,12 +18,12 @@ CPT_REGEX = re.compile(r"^(?:\d{5}|\d{4}[A-Z])$")
 
 # Simulated reference table for demos
 ICD10_REFERENCE = {
-    "I10":  ("Hypertension",                    "CIRCULATORY"),
-    "E119": ("Type 2 diabetes",                 "ENDOCRINE"),
-    "J45":  ("Asthma",                          "RESPIRATORY"),
-    "M545": ("Low back pain",                   "MUSCULOSKELETAL"),
-    "R51":  ("Headache",                        "SYMPTOMS"),
-    "Z00":  ("Encounter for general exam",      "FACTORS_HEALTH"),
+    "I10": ("Hypertension", "CIRCULATORY"),
+    "E119": ("Type 2 diabetes", "ENDOCRINE"),
+    "J45": ("Asthma", "RESPIRATORY"),
+    "M545": ("Low back pain", "MUSCULOSKELETAL"),
+    "R51": ("Headache", "SYMPTOMS"),
+    "Z00": ("Encounter for general exam", "FACTORS_HEALTH"),
 }
 
 CPT_REFERENCE = {

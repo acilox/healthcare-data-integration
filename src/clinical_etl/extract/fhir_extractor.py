@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Iterator
 from datetime import date, datetime
-from typing import Any, Iterator
+from typing import Any
 
 import httpx
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
@@ -24,7 +25,7 @@ class FHIRPatientExtractor:
         self._token: str | None = None
         self._token_expires_at: float = 0.0
 
-    def __enter__(self) -> "FHIRPatientExtractor":
+    def __enter__(self) -> FHIRPatientExtractor:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -61,12 +62,15 @@ class FHIRPatientExtractor:
     def _fetch_page(self, url: str) -> dict[str, Any]:
         self._authenticate()
         resp = self._client.get(
-            url, headers={"Authorization": f"Bearer {self._token}", "Accept": "application/fhir+json"}
+            url,
+            headers={"Authorization": f"Bearer {self._token}", "Accept": "application/fhir+json"},
         )
         resp.raise_for_status()
         return resp.json()
 
-    def fetch_patients(self, modified_after: datetime | None = None) -> Iterator[PatientMatchCandidate]:
+    def fetch_patients(
+        self, modified_after: datetime | None = None
+    ) -> Iterator[PatientMatchCandidate]:
         """Iterate paginated Patient resources."""
         params = ["_count=100"]
         if modified_after:

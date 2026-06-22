@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, SecretStr
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -37,7 +37,8 @@ class Settings(BaseSettings):
     fhir_base_url: str = "https://fhir.example.com/r4"
     fhir_client_id: SecretStr = SecretStr("__PLACEHOLDER__")
     fhir_client_secret: SecretStr = SecretStr("__PLACEHOLDER__")
-    fhir_token_url: str = "https://fhir.example.com/oauth/token"
+    # OAuth token endpoint URL (not a secret; the credentials are SecretStr above)
+    fhir_token_url: str = "https://fhir.example.com/oauth/token"  # noqa: S105
 
     # SFTP
     sftp_host: str = "labs-sftp.example.com"

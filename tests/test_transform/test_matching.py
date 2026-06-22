@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import UTC, date
 
 from clinical_etl.transform import PatientMatcher
 
@@ -28,7 +28,7 @@ def test_exact_match_auto_merge(candidate_alice, master_alice):
 
 
 def test_mismatched_candidate(master_alice):
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from clinical_etl.models import PatientMatchCandidate, PatientSource
 
@@ -40,7 +40,7 @@ def test_mismatched_candidate(master_alice):
         date_of_birth=date(1950, 1, 1),
         state="CA",
         postal_code="90001",
-        extracted_at=datetime.now(tz=timezone.utc),
+        extracted_at=datetime.now(tz=UTC),
     )
     matcher = PatientMatcher()
     score = matcher.score(candidate, master_alice)

@@ -7,7 +7,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /build
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential libpq-dev libaio1 \
+    build-essential libpq-dev \
+    && (apt-get install -y --no-install-recommends libaio1t64 \
+        || apt-get install -y --no-install-recommends libaio1) \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml README.md ./
@@ -17,7 +19,9 @@ RUN pip install --upgrade pip && pip install --prefix=/install .
 FROM python:3.11-slim AS runtime
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 libaio1 \
+    libpq5 \
+    && (apt-get install -y --no-install-recommends libaio1t64 \
+        || apt-get install -y --no-install-recommends libaio1) \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --gid 1000 clinical_etl \
     && useradd --uid 1000 --gid clinical_etl --shell /bin/bash --create-home clinical_etl

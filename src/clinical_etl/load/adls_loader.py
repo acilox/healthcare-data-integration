@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 import pandas as pd
 
 from clinical_etl.config import get_logger, get_settings
@@ -58,7 +56,5 @@ class ADLSDeltaLoader:
             partition_by=partition_by,
             storage_options=self._storage_options(),
         )
-        logger.info(
-            "adls_delta_written", table=table_name, rows=len(df), mode=mode, path=path
-        )
+        logger.info("adls_delta_written", table=table_name, rows=len(df), mode=mode, path=path)
         return len(df)

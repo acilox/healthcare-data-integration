@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 import pytest
 
@@ -26,7 +26,7 @@ def candidate_alice() -> PatientMatchCandidate:
         state="MA",
         postal_code="02101",
         country="US",
-        extracted_at=datetime.now(tz=timezone.utc),
+        extracted_at=datetime.now(tz=UTC),
     )
 
 
@@ -42,6 +42,6 @@ def master_alice() -> MasterPatient:
         state="MA",
         country="US",
         source_ids=["FHIR-P-001", "ORACLE-XYZ"],
-        first_seen_at=datetime.now(tz=timezone.utc),
-        last_seen_at=datetime.now(tz=timezone.utc),
+        first_seen_at=datetime.now(tz=UTC),
+        last_seen_at=datetime.now(tz=UTC),
     )

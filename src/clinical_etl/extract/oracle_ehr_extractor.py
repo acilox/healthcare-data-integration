@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from datetime import datetime
-from typing import Iterator
 
 from clinical_etl.config import get_logger, get_settings
 from clinical_etl.models import PatientMatchCandidate, PatientSource

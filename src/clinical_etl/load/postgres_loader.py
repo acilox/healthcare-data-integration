@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable
+from collections.abc import Iterable
 
 import pandas as pd
 from sqlalchemy import create_engine
@@ -21,9 +21,7 @@ class PostgresODSLoader:
         self.engine = None
 
     def __enter__(self):
-        self.engine = create_engine(
-            self.settings.postgres_url, pool_pre_ping=True, pool_size=5
-        )
+        self.engine = create_engine(self.settings.postgres_url, pool_pre_ping=True, pool_size=5)
         return self
 
     def __exit__(self, *_):
@@ -49,9 +47,7 @@ class PostgresODSLoader:
                 for c in tbl.columns
                 if c.name not in ("master_id", "first_seen_at")
             }
-            stmt = insert_stmt.on_conflict_do_update(
-                index_elements=["master_id"], set_=update_cols
-            )
+            stmt = insert_stmt.on_conflict_do_update(index_elements=["master_id"], set_=update_cols)
             result = conn.execute(stmt)
 
         logger.info("postgres_upserted", rows=result.rowcount)

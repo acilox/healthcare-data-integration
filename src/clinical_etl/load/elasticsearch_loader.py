@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from clinical_etl.config import get_logger, get_settings
 
@@ -33,11 +33,13 @@ class ElasticsearchLoader:
         self._client = Elasticsearch(
             hosts=[self.settings.es_hosts],
             basic_auth=(
-                self.settings.es_user,
-                self.settings.es_password.get_secret_value(),
-            )
-            if self.settings.es_password.get_secret_value() not in ("", "__PLACEHOLDER__")
-            else None,
+                (
+                    self.settings.es_user,
+                    self.settings.es_password.get_secret_value(),
+                )
+                if self.settings.es_password.get_secret_value() not in ("", "__PLACEHOLDER__")
+                else None
+            ),
         )
         logger.info("es_connected", hosts=self.settings.es_hosts)
 
@@ -61,5 +63,10 @@ class ElasticsearchLoader:
             for doc in docs
         )
         success, failed = bulk(self._client, actions, raise_on_error=False)
-        logger.info("es_bulk_indexed", index=index, success=success, failed=len(failed) if isinstance(failed, list) else 0)
+        logger.info(
+            "es_bulk_indexed",
+            index=index,
+            success=success,
+            failed=len(failed) if isinstance(failed, list) else 0,
+        )
         return success

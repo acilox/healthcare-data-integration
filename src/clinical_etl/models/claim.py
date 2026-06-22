@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -28,7 +27,7 @@ class Claim(BaseModel):
 
     claim_id: str = Field(..., min_length=1, max_length=64)
     master_id: str
-    submitter_id: Optional[str] = Field(None, max_length=64)
+    submitter_id: str | None = Field(None, max_length=64)
     payer_id: str = Field(..., max_length=64)
 
     statement_from: date

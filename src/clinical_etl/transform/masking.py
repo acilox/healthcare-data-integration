@@ -26,7 +26,7 @@ from __future__ import annotations
 import hashlib
 import re
 from datetime import date, datetime
-from typing import Any, Optional
+from typing import Any
 
 from clinical_etl.config import get_logger, get_settings
 
@@ -53,7 +53,7 @@ class PHIMasker:
         normalized = name.strip().lower()
         return hashlib.sha256((normalized + self._salt).encode()).hexdigest()[:16]
 
-    def mask_dob(self, dob: date | datetime | None) -> Optional[int]:
+    def mask_dob(self, dob: date | datetime | None) -> int | None:
         """Return year only. If age > 89, return None per Safe Harbor."""
         if dob is None:
             return None
@@ -64,7 +64,7 @@ class PHIMasker:
             return None
         return dob.year
 
-    def mask_zip(self, zip_code: str | None) -> Optional[str]:
+    def mask_zip(self, zip_code: str | None) -> str | None:
         if not zip_code:
             return None
         # Per Safe Harbor: ZIP3 also blanked for ZIP3s with population < 20,000
@@ -72,13 +72,13 @@ class PHIMasker:
         digits = re.sub(r"\D", "", zip_code)
         return digits[:3] if len(digits) >= 3 else None
 
-    def mask_ssn(self, ssn: str | None) -> Optional[str]:
+    def mask_ssn(self, ssn: str | None) -> str | None:
         if not ssn:
             return None
         digits = re.sub(r"\D", "", ssn)
         return digits[-4:] if len(digits) >= 4 else None
 
-    def mask_email(self, email: str | None) -> Optional[str]:
+    def mask_email(self, email: str | None) -> str | None:
         if not email:
             return None
         # Keep domain, mask local part
@@ -88,12 +88,12 @@ class PHIMasker:
         except ValueError:
             return "***"
 
-    def mask_phone(self, phone: str | None) -> Optional[str]:
+    def mask_phone(self, phone: str | None) -> str | None:
         if not phone:
             return None
         return "***-***-XXXX"
 
-    def mask_ip(self, ip: str | None) -> Optional[str]:
+    def mask_ip(self, ip: str | None) -> str | None:
         if not ip:
             return None
         parts = ip.split(".")

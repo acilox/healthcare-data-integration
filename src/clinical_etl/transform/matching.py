@@ -10,9 +10,7 @@ Uses a weighted composite of:
 
 from __future__ import annotations
 
-from datetime import timedelta
-
-from rapidfuzz import fuzz, jaro_winkler
+from rapidfuzz.distance import JaroWinkler
 
 from clinical_etl.config import get_logger, get_settings
 from clinical_etl.models import MasterPatient, PatientMatchCandidate, PatientMatchScore
@@ -36,20 +34,13 @@ class PatientMatcher:
         self.review_threshold = s.match_review_threshold
         self.dob_tolerance_days = s.match_dob_tolerance_days
 
-    def score(
-        self, candidate: PatientMatchCandidate, master: MasterPatient
-    ) -> PatientMatchScore:
+    def score(self, candidate: PatientMatchCandidate, master: MasterPatient) -> PatientMatchScore:
         name_s = self._name_score(candidate, master)
         dob_s = self._dob_score(candidate, master)
         addr_s = self._addr_score(candidate, master)
         ident_s = self._ident_score(candidate, master)
 
-        composite = (
-            W_NAME * name_s
-            + W_DOB * dob_s
-            + W_ADDR * addr_s
-            + W_IDENT * ident_s
-        )
+        composite = W_NAME * name_s + W_DOB * dob_s + W_ADDR * addr_s + W_IDENT * ident_s
 
         if composite >= self.auto_merge_threshold:
             decision = "AUTO_MERGE"
@@ -85,12 +76,15 @@ class PatientMatcher:
         if m.first_name_hash and m.last_name_hash:
             # Hash comparison: only 0 or 1
             from clinical_etl.transform.masking import PHIMasker
+
             masker = PHIMasker()
-            if masker.hash_name(c.first_name) == m.first_name_hash and \
-               masker.hash_name(c.last_name) == m.last_name_hash:
+            if (
+                masker.hash_name(c.first_name) == m.first_name_hash
+                and masker.hash_name(c.last_name) == m.last_name_hash
+            ):
                 return 1.0
         # Fallback fuzzy when hashes absent (e.g., first time)
-        return jaro_winkler.normalized_similarity(
+        return JaroWinkler.normalized_similarity(
             f"{c.first_name} {c.last_name}", f"{c.first_name} {c.last_name}"
         )
 
@@ -122,7 +116,7 @@ class PatientMatcher:
     @staticmethod
     def compare_names_jw(a: str, b: str) -> float:
         """Public helper for tests/UI."""
-        return jaro_winkler.normalized_similarity(a, b)
+        return JaroWinkler.normalized_similarity(a, b)
 
     @staticmethod
     def dob_within_tolerance(d1, d2, tolerance_days: int = 1) -> bool:

@@ -6,10 +6,10 @@ This module includes a minimal parser sufficient to demonstrate the data flow.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
-from typing import Iterator
 
 from clinical_etl.config import get_logger
 from clinical_etl.models import Claim, ClaimLine, RemittanceAdvice

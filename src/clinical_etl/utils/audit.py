@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from clinical_etl.config import get_logger, get_settings
@@ -42,7 +42,7 @@ class HIPAAAuditLogger:
         metadata: dict | None = None,
     ) -> None:
         event = {
-            "ts": datetime.now(tz=timezone.utc).isoformat(),
+            "ts": datetime.now(tz=UTC).isoformat(),
             "actor": actor,
             "action": action,
             "resource_type": resource_type,

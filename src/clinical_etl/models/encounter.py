@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -13,8 +12,8 @@ class DiagnosisCode(BaseModel):
     """ICD-10-CM diagnosis code."""
 
     code: str = Field(..., min_length=3, max_length=8)
-    description: Optional[str] = Field(None, max_length=256)
-    category: Optional[str] = Field(None, max_length=64)
+    description: str | None = Field(None, max_length=256)
+    category: str | None = Field(None, max_length=64)
     is_valid: bool = False
 
     @field_validator("code")
@@ -27,7 +26,7 @@ class ProcedureCode(BaseModel):
     """CPT procedure code."""
 
     code: str = Field(..., min_length=5, max_length=5)
-    description: Optional[str] = Field(None, max_length=256)
+    description: str | None = Field(None, max_length=256)
     is_valid: bool = False
 
     @field_validator("code")
@@ -48,23 +47,23 @@ class Encounter(BaseModel):
     encounter_id: str = Field(..., min_length=1, max_length=64)
     master_id: str  # Patient MPI link
     encounter_type: str  # AMBULATORY | EMERGENCY | INPATIENT | OUTPATIENT
-    encounter_class: Optional[str] = None
+    encounter_class: str | None = None
 
     start_datetime: datetime
-    end_datetime: Optional[datetime] = None
+    end_datetime: datetime | None = None
 
-    provider_id: Optional[str] = Field(None, max_length=64)
-    provider_name: Optional[str] = Field(None, max_length=256)
-    facility_id: Optional[str] = Field(None, max_length=64)
-    facility_name: Optional[str] = Field(None, max_length=256)
+    provider_id: str | None = Field(None, max_length=64)
+    provider_name: str | None = Field(None, max_length=256)
+    facility_id: str | None = Field(None, max_length=64)
+    facility_name: str | None = Field(None, max_length=256)
 
     diagnoses: list[DiagnosisCode] = Field(default_factory=list)
     procedures: list[ProcedureCode] = Field(default_factory=list)
 
-    chief_complaint: Optional[str] = Field(None, max_length=512)
+    chief_complaint: str | None = Field(None, max_length=512)
 
     # Cost
-    total_charges: Optional[Decimal] = Field(None, ge=0)
+    total_charges: Decimal | None = Field(None, ge=0)
 
     # Source
     source_system: str
